@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon</title>
+    <style>
+        table{
+            width: 30%;
+            text-align: center;
+            margin: auto;
+        }
+        h1{
+            text-align: center;
+            margin: 2%;
+        }
+        form{
+            width: 20%;
+            margin: auto;
+            margin-top: 4%;
+        }
+        #cardd{
+            width: 40%;
+            margin: auto;
+            margin-top: 4%;
+        }
+    </style>
+</head>
+<body>
+    <div id="cont">
+    <h1>Pokemon-list</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody id = "appen">
+        </tbody>
+    </table>
+</div>
+<div id="formmm">
+    <form id="formm">
+        <h1>Search</h1>
+        <input type="text" id="search" required>
+        <input type="submit" id="sub">
+    </form>
+</div>
+</body>
+<script>
+
+    let tbl = document.getElementById("appen");
+    async function getData(){
+        let poke_arr = localStorage.getItem("poke_arr");
+        if(poke_arr == null){
+            let res = await fetch("https://pokeapi.co/api/v2/pokemon/");
+            let data = await res.json();
+            localStorage.setItem("poke_arr",JSON.stringify(data));
+            displayData();
+        }
+        else{
+            displayData();
+        }
+    }
+
+    function displayData(){
+        let poke_arr = JSON.parse(localStorage.getItem("poke_arr"));
+        let name_data = poke_arr.results;
+        name_data.forEach(function(data){
+            let tr = document.createElement("tr");
+            let td = document.createElement("td");
+            td.innerHTML = data.name;
+            tr.append(td);
+            tbl.append(tr);
+        })
+    }
+
+    getData();
+
+    async function getPokeData(inp){
+            let res = await fetch(`https://pokeapi.co/api/v2/pokemon/${inp}/`);
+            let data = await res.json();
+            displayPokeData(data)
+    }
+
+    document.querySelector("#formm").addEventListener("submit",function(){
+        event.preventDefault();
+        let inp = document.getElementById("search").value;
+        getPokeData(inp);
+    });
+
+    function displayPokeData(data){
+        let cont = document.getElementById("cont");
+        console.log(data);
+        let card = document.createElement("div");
+        card.setAttribute("id","cardd");
+        let pokeid = document.createElement("div");
+        pokeid.innerHTML = `<b>ID : </b> ${data.id}`;
+        let pokename = document.createElement("div");
+        pokename.innerHTML = `<b>Name : </b> ${data.name}`;
+        let pokeheight = document.createElement("div");
+        pokeheight.innerHTML = `<b>Height : </b> ${data.height}`;
+        let pokeweight = document.createElement("div");
+        pokeweight.innerHTML = `<b>Weight : </b> ${data.weight}`;
+        let pokeabilities =document.createElement("div");
+        let abilitiesarr = [];
+        let abi = data.abilities;
+        abi.forEach(function(dt){
+            abilitiesarr.push(dt.ability.name);
+        });
+        console.log(abilitiesarr);
+        pokeabilities.innerHTML = `<b>Abilities : </b> ${abilitiesarr.join(", ")}`;
+
+
+        let pokemoves = document.createElement("div");
+        let pokemovesarr = [];
+        let mov = data.moves;
+        mov.forEach(function(dt){
+            pokemovesarr.push(dt.move.name);
+        });
+        console.log(pokemovesarr);
+        pokemoves.innerHTML = `<b>Moves : </b> ${pokemovesarr.join(", ")}`;
+        card.append(pokeid,pokename,pokeheight,pokeweight,pokeabilities,pokemoves);
+
+        let cont1 = document.getElementById("formmm");
+        cont1.append(card);
+        cont.innerHTML = "";
+    }
+</script>
+</html>
